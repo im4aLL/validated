@@ -51,7 +51,7 @@ Validate.prototype.passed = function() {
 
     var rules = vm._getRules();
 
-    console.log(rules);
+    $(vm.form).find('.is--error').removeClass('is--error');
 
     _.each(rules, function(ruleArray, key){
         _.each(ruleArray, function(rule){
@@ -59,18 +59,29 @@ Validate.prototype.passed = function() {
         });
     });
 
-    console.log(vm._getErrors());
-
-    return false;
+    return _.size(vm.getErrors()) === 0;
 };
 
 /**
  * Show respective errors
  *
- * @return
+ * @return this;
  */
 Validate.prototype.showErrors = function() {
+    var vm = this;
+    var errors = vm.getErrors();
 
+    if(_.size(errors) > 0) {
+        _.each(errors, function(fieldName){
+            var $field = $('[name="'+ fieldName +'"]');
+
+            if($field.length > 0) {
+                $field.closest('.form__field').addClass('is--error');
+            }
+        });
+    }
+
+    return vm;
 };
 
 /**
@@ -79,7 +90,7 @@ Validate.prototype.showErrors = function() {
  * @return object
  */
 Validate.prototype.getData = function() {
-
+    return _.pickBy(this.data, function(value, key) { return !key.startsWith('_'); });
 };
 
 /**
@@ -105,7 +116,7 @@ Validate.prototype._getRules = function() {
  * Get erros
  * @return array
  */
-Validate.prototype._getErrors = function() {
+Validate.prototype.getErrors = function() {
     var vm = this;
 
     return vm.errors.filter(function(item, pos) {
